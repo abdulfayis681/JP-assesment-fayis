@@ -24,20 +24,29 @@ const getApiCall = (url) => {
   console.log(`Calling API: ${url}`);
   return axios.get(url).then(response => {
     return response.data;
-  }).catch(error => {
-    console.log(`Error calling API: ${url}. Code: ${error.code}`);
-    return {};
   })
+    .catch(error => {
+      console.log(`Error calling API: ${url}. Code: ${error.code}`);
+      return {'error': error.code};
+    })
 }
 
 const postApiCall = (url, data) => {
   console.log(`Calling API: ${url}`);
   return axios.post(url, data).then(response => {
     return response.data;
-  }).catch(error => {
-    console.log(`Error calling API: ${url}. Code: ${error.code}`);
-    return {};
   })
+    .catch(error => {
+      console.log(`Error calling API: ${url}. Code: ${error.code}`);
+      return {'error': error.code};
+    })
+}
+
+const sendResponse = (res, data) => {
+  if (data.error) {
+    res.status(500);
+  }
+  res.json(data);
 }
 
 app.get('/', (req, res) => {
@@ -45,27 +54,31 @@ app.get('/', (req, res) => {
 })
 
 app.get('/ping/stats', (req, res) => {
-  getApiCall(pingerBaseUrl + '/ping/stats').then(r => {
-    res.json(r);
-  })
+  getApiCall(pingerBaseUrl + '/ping/stats')
+    .then(data => {
+      sendResponse(res, data);
+    })
 })
 
 app.get('/ping/urls', (req, res) => {
-  getApiCall(pingerBaseUrl + '/ping/urls').then(r => {
-    res.json(r);
-  })
+  getApiCall(pingerBaseUrl + '/ping/urls')
+    .then(data => {
+      sendResponse(res, data);
+    })
 })
 
 app.post('/ping/updateUrl', (req, res) => {
-  postApiCall(pingerBaseUrl + '/ping/updateUrl', req.body).then(r => {
-    res.json(r);
-  })
+  postApiCall(pingerBaseUrl + '/ping/updateUrl', req.body)
+    .then(data => {
+      sendResponse(res, data);
+    })
 })
 
 app.post('/url/info', (req, res) => {
-  postApiCall(detailsBaseUrl + '/url/info', req.body).then(r => {
-    res.json(r);
-  })
+  postApiCall(detailsBaseUrl + '/url/info', req.body)
+    .then(data => {
+      sendResponse(res, data);
+    })
 })
 
 app.listen(port, () => {
