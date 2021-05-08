@@ -4,7 +4,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: frontend-envoy-proxy-config
+  name: envoy-proxy-frontend-config
   namespace: default
 data:
   envoy.yaml: |-
@@ -63,48 +63,52 @@ data:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: frontend-envoy-proxy
+  name: envoy-proxy-frontend
   namespace: default
   labels:
-    app: frontend-envoy-proxy
+    app: envoy-proxy-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend-envoy-proxy
+      app: envoy-proxy-frontend
   template:
     metadata:
       labels:
-        app: frontend-envoy-proxy
+        app: envoy-proxy-frontend
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: '/stats/prometheus'
     spec:
       containers:
-      - name: frontend-envoy-proxy
+      - name: envoy-proxy-frontend
         image: envoyproxy/envoy:v1.18.2
         command:
         - "envoy"
         - "-c"
-        - "/etc/envoy/envoy.yaml" 
+        - "/etc/envoy/envoy.yaml"
         ports:
         - containerPort: 8000
         imagePullPolicy: IfNotPresent
         volumeMounts:
-        - name: frontend-envoy-proxy-config # loading the config using config map
+        - name: envoy-proxy-frontend-config # loading the config using config map
           mountPath: /etc/envoy/
       volumes:
-      - name: frontend-envoy-proxy-config
+      - name: envoy-proxy-frontend-config
         configMap:
-          name: frontend-envoy-proxy-config
+          name: envoy-proxy-frontend-config
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: frontend-envoy-proxy-service
+  name: envoy-proxy-frontend-service
   namespace: default
   labels:
-    app: frontend-envoy-proxy
+    app: envoy-proxy-frontend
 spec:
   selector:
-    app: frontend-envoy-proxy
+    app: envoy-proxy-frontend
   ports:
   - protocol: TCP
     port: 80
