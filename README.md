@@ -85,7 +85,6 @@ Check pods:
 ```
 $ kubectl get po
 NAME                         READY   STATUS    RESTARTS   AGE
-busybox                      1/1     Running   1          31m
 details-77498f8c7d-gvqcm     1/1     Running   0          10m
 frontend-7486854785-4rpm4    1/1     Running   0          10m
 pinger-v1-7bcc658775-ftbfs   1/1     Running   0          10m
