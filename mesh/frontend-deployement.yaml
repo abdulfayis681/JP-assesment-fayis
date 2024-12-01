@@ -1,0 +1,110 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: envoy-proxy-frontend
+#   labels:
+#     app: envoy-proxy-frontend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: envoy-proxy-frontend
+#   template:
+#     metadata:
+#       labels:
+#         app: envoy-proxy-frontend
+#       annotations:
+#         prometheus.io/scrape: 'true'
+#         prometheus.io/port: '8081'
+#         prometheus.io/path: '/stats/prometheus'
+#     spec:
+#       containers:
+#         - name: frontend
+#           image: localhost/frontend:v1
+#           env:
+#           - name: PINGER_BASE_URL
+#             value: "http://pinger-v1-envoy-service:3000"
+#           - name: DETAILS_BASE_URL
+#             value: "http://detailes-envoy-service:4000"
+#           ports:
+#             - containerPort: 9000
+
+#         # The Envoy sidecar container
+#         - name: envoy
+#           image: envoyproxy/envoy:v1.20.0
+#           ports:
+#             - containerPort: 8000  # Expose Envoy listener
+#             - containerPort: 8081  # Expose Envoy admin
+#           volumeMounts:
+#             - name: envoy-config
+#               mountPath: /etc/envoy
+#           args:
+#             - "--config-path"
+#             - "/etc/envoy/envoy.yaml" 
+#       volumes:
+#         - name: envoy-config
+#           configMap:
+#             name: envoy-proxy-frontend-config
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-proxy-frontend
+  labels:
+    app: envoy-proxy-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy-proxy-frontend
+  template:
+    metadata:
+      labels:
+        app: envoy-proxy-frontend
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: '/stats/prometheus'
+    spec:
+      containers:
+        - name: frontend
+          image: localhost/frontend:v1
+          env:
+            - name: PINGER_BASE_URL
+              value: "http://pinger-v2-envoy-service:3030"
+            - name: DETAILS_BASE_URL
+              value: "http://detailes-envoy-service:4040"
+          ports:
+            - containerPort: 9000
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "1"
+            limits:
+              memory: "1Gi"
+              cpu: "2"
+
+        # The Envoy sidecar container
+        - name: envoy
+          image: envoyproxy/envoy:v1.20.0
+          ports:
+            - containerPort: 8000  # Expose Envoy listener
+            - containerPort: 8081  # Expose Envoy admin
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+          args:
+            - "--config-path"
+            - "/etc/envoy/envoy.yaml"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "512Mi"
+              cpu: "1"
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-proxy-frontend-config

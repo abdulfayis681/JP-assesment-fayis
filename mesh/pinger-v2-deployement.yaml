@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-proxy-pinger-v2
+  labels:
+    app: envoy-proxy-pinger-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy-proxy-pinger-v2
+  template:
+    metadata:
+      labels:
+        app: envoy-proxy-pinger-v2
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: '/stats/prometheus'
+    spec:
+      containers:
+        - name: pinger-v2
+          image: localhost/pinger:v2
+          ports:
+            - containerPort: 3000
+
+        # The Envoy sidecar container
+        - name: envoy
+          image: envoyproxy/envoy:v1.20.0
+          ports:
+            - containerPort: 3030  # Expose Envoy listener
+            - containerPort: 8081  # Expose Envoy admin
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+          args:
+            - "--config-path"
+            - "/etc/envoy/envoy.yaml" 
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-proxy-pinger-v2-config

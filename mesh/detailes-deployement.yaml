@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-proxy-detailes
+  labels:
+    app: envoy-proxy-detailes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy-proxy-detailes
+  template:
+    metadata:
+      labels:
+        app: envoy-proxy-detailes
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: '/stats/prometheus'
+    spec:
+      containers:
+        - name: details
+          image: localhost/details:v1
+          ports:
+            - containerPort: 4000
+
+        # The Envoy sidecar container
+        - name: envoy
+          image: envoyproxy/envoy:v1.20.0
+          ports:
+            - containerPort: 4040  # Expose Envoy listener
+            - containerPort: 8081  # Expose Envoy admin
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+          args:
+            - "--config-path"
+            - "/etc/envoy/envoy.yaml" 
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-proxy-detailes-config

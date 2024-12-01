@@ -8,7 +8,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: default
+  # namespace: default
   labels:
     app: frontend
     version: v1
@@ -27,7 +27,7 @@ spec:
         image: localhost/frontend:v1
         env:
         - name: PINGER_BASE_URL
-          value: "http://pinger-v1-service:3000"
+          value: "http://pinger-v2-service:3000"
         - name: DETAILS_BASE_URL
           value: "http://details-service:4000"
         ports:
@@ -43,7 +43,7 @@ metadata:
     app: frontend
     version: v1
   name: frontend-service
-  namespace: default
+  # namespace: default
 spec:
   ports:
   - port: 9000
@@ -59,7 +59,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: details
-  namespace: default
+  # namespace: default
   labels:
     app: details
     version: v1
@@ -88,7 +88,7 @@ metadata:
     app: details
     version: v1
   name: details-service
-  namespace: default
+  # namespace: default
 spec:
   ports:
   - port: 4000
@@ -104,7 +104,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pinger-v1
-  namespace: default
+  # namespace: default
   labels:
     app: pinger
     version: v1
@@ -135,7 +135,7 @@ metadata:
     app: pinger
     version: v1
   name: pinger-v1-service
-  namespace: default
+  # namespace: default
 spec:
   ports:
   - port: 3000
@@ -152,7 +152,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pinger-v2
-  namespace: default
+  # namespace: default
   labels:
     app: pinger
     version: v2
@@ -183,7 +183,7 @@ metadata:
     app: pinger
     version: v2
   name: pinger-v2-service
-  namespace: default
+  # namespace: default
 spec:
   ports:
   - port: 3000
